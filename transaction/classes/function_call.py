@@ -149,7 +149,8 @@ class FunctionCall:
     @staticmethod
     def _resolve_function(qualified_name: str) -> Callable[..., Any]:
         """
-        Convert qualified_name dot notation to a callable function/classmethod/staticmethod
+        Convert qualified_name dot notation to a callable function/classmethod/staticmethod to use
+        with Python's internal __import__() function.
 
         Args:
             qualified_name: str

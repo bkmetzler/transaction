@@ -1,5 +1,5 @@
 [build-system]
-requires = ["hatchling", "hatch-vcs"]
+requires = ["hatchling >= 1.26", "hatch-vcs"]
 build-backend = "hatchling.build"
 
 [project]
@@ -13,7 +13,22 @@ readme = "README.md"
 license = { file = "LICENSE.md" }
 requires-python = ">=3.12"
 dependencies = []
-homepage = "https://github.com/bkmetzler/transactional"
+
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
+    "Programming Language :: Python :: 3.15",
+    "Operating System :: OS Independent",
+    "Intended Audience :: Developers",
+    "Intended Audience :: System Administrators",
+    "License :: Free For Home Use",
+    "License :: Free for non-commercial use",
+]
+
 
 [project.urls]
 "Home Page" = "https://github.com/bkmetzler/transaction"
