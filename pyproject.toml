@@ -20,6 +20,23 @@ homepage = "https://github.com/bkmetzler/transactional"
 source = "vcs"
 path = "transactional/version.py"
 
+[tool.hatch.build]
+skip-excluded-dirs = true
+include = [
+  "transaction/**",
+  "pyproject.toml",
+  "*.md",
+  "noxfile.py",
+  ".pre-commit-config.yaml",
+  "tests/**",
+  "dev-requirements.txt"
+]
+exclude = [
+  "*.pyc",
+  "__pycache__/",
+  "dist",
+]
+
 [tool.hatch.envs.dev]
 dependencies = [
   "pytest",
