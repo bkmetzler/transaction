@@ -12,3 +12,9 @@
 4. Use `pytest` to run tests
 
 Please follow black formatting and mypy typing.
+
+
+## Supported Python versions
+
+This will only support Python versions that have yet to reach
+End Of Support(EoS) and End Of Life (EoL), which ever comes sooner.
