@@ -1,3 +1,3 @@
 # Current TODO list
 
-Currently nothing on the TODO list
+Nothing on the TODO list
