@@ -17,11 +17,23 @@ P = ParamSpec("P")
 
 
 def transaction(func: Callable[P, T]) -> Callable[P, T | Awaitable[T]]:
+    """
+    Decorator used to define initial functions
+    Args:
+        func:
+
+    Returns:
+
+    """
     registrar = TransactionWrapper(func)
     return cast(Callable[P, T | Awaitable[T]], registrar)
 
 
 class TransactionWrapper:
+    """
+    Class to help decorator with defining the rollback_func rollback function and if it is a coroutine or not
+    """
+
     def __init__(self, func: Callable[P, T]) -> None:
         self.func = func
         self.rollback_func: Callable[..., Any] | None = None
@@ -29,10 +41,31 @@ class TransactionWrapper:
         wraps(func)(self)  # type: ignore[arg-type]
 
     def rollback(self, func: Callable[..., Any]) -> Callable[..., Any]:
+        """
+        Define rollback function for FunctionCall
+
+        Args:
+            func: Rollback function
+
+        Returns:
+            Inputted callable function
+        """
         self.rollback_func = func
         return func
 
     def __call__(self, *args: ParamSpec, **kwargs: ParamSpecKwargs) -> T | Awaitable[T]:
+        """
+        Catch all calls not defined previously
+        Record decorated function as a part of the TransactionState
+
+        Args:
+            *args: Arguments
+            **kwargs: KeyWord Arguments
+
+        Returns:
+            Callable or Awaitable function
+
+        """
         call = FunctionCall(
             name=self.func.__qualname__,
             args=args,
