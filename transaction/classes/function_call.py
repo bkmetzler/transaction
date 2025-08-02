@@ -1,13 +1,20 @@
 import importlib
 import inspect
+import json
+import pickle
 from collections.abc import Callable
 from dataclasses import dataclass
 from typing import Any
+from typing import cast
 from typing import Self
 
 
 @dataclass
 class FunctionCall:
+    """
+    Class to represent a function call and its associated rollback function
+    """
+
     name: str
     args: tuple[Any, ...]
     kwargs: dict[str, Any]
@@ -16,9 +23,22 @@ class FunctionCall:
     exception: str | None = None
 
     def __str__(self) -> str:
+        """
+        Return string representation of class instance
+
+        Returns: str
+        """
         return f"{self.name}(args={self.args}, kwargs={self.kwargs})"
 
     async def rollback(self) -> None:
+        """
+        Execute 'self.rollback_func' and mark 'self.rolled_back' to True.
+        'self.rollback_func' is a custom function to rollback the current function.
+
+        Returns:
+            None
+
+        """
         if not self.rollback_func:
             self.exception = f"No rollback function for {self.name}"
             raise RuntimeError(self.exception)
@@ -33,6 +53,13 @@ class FunctionCall:
             raise
 
     def to_dict(self) -> dict[str, Any]:
+        """
+        Returns dict version of data in 'self'
+
+        Returns:
+            dict[str, Any]
+                dict representation of FunctionCall/Self
+        """
         return {
             "name": self.name,
             "args": self.args,
@@ -44,8 +71,71 @@ class FunctionCall:
             "exception": self.exception,
         }
 
+    def to_json(self) -> str:
+        """
+        Returns string version returned by 'to_dict()'
+
+        Returns:
+            str
+                JSON string representation of FunctionCall/Self
+        """
+        return json.dumps(self.to_dict(), indent=4)
+
+    def to_pickle(self) -> bytes:
+        """
+        Matching helper function for "cls.from_pickle".
+
+        Returns:
+            bytes
+                Pickled instance version of FunctionCall/Self
+        """
+
+        return pickle.dumps(self)
+
+    @classmethod
+    def from_pickle(cls, pickle_bytes: bytes) -> Self | Any:
+        """
+        This is more of a helper function to convert a pickled instance of class.
+        Good use with Redis
+
+        Args:
+            pickle_bytes:
+                Pickled version of FunctionCall/Self
+        Returns:
+            FunctionCall/Self
+        """
+        return cast(Self, pickle.loads(pickle_bytes))
+
+    @classmethod
+    def from_json(cls, in_json: str) -> Self:
+        """
+        Convert from JSON string to an instance of the class
+
+        Args:
+            cls:
+                ClassMethod definition
+            in_json: str
+                Representation of JSON data needed for 'cls.from_dict()'
+
+        Returns:
+            FunctionCall/Self
+        """
+        return cls.from_dict(json.loads(in_json))
+
     @classmethod
     def from_dict(cls, data: dict[str, Any]) -> Self:
+        """
+        Convert from dict to FunctionCall/Self.
+
+        Used to read from an external data source.
+
+        Args:
+            data: dict
+                Representation of FunctionCall.
+        Returns:
+            FunctionCall/Self
+
+        """
         rollback_func = cls._resolve_function(data["rollback_func"]) if data["rollback_func"] else None
         return cls(
             name=data["name"],
@@ -58,6 +148,15 @@ class FunctionCall:
 
     @staticmethod
     def _resolve_function(qualified_name: str) -> Callable[..., Any]:
+        """
+        Convert qualified_name dot notation to a callable function/classmethod/staticmethod
+
+        Args:
+            qualified_name: str
+                dot notation string of a function to be imported
+        Returns:
+
+        """
         module_name, func_name = qualified_name.rsplit(".", 1)
         module = importlib.import_module(module_name)
         func = getattr(module, func_name)
