@@ -1,5 +1,5 @@
-MIT License
+Copyright (c) 2025
 
-Copyright (c) ...
+Open Source and Not For Profit are here by granted a license based off of the standard MIT License.
 
-Permission is hereby granted...
+Businesses, or anyone who could sell downstream software using this library, will need to contact author for licensing.
