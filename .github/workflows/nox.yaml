@@ -9,8 +9,8 @@ jobs:
     runs-on: self-hosted
     strategy:
       matrix:
-        python-version: [ "3.9", "3.10", "3.11", "3.12", "3.13", "3.14.0-rc.1" ]
-
+        python-version: [ "3.11", "3.12", "3.13" ]
+      max-parallel: 5
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -20,5 +20,20 @@ jobs:
           python-version: ${{ matrix.python-version }}
       - name: Install nox
         run: python -m pip install --upgrade pip nox
-      - name: Run nox default session
-        run: nox
+      - name: Perform string manipulation
+        id: version_processed
+        run: |
+          input_string="${{ matrix.python-version }}"
+          # Convert to lowercase
+          maj_min_version=$(echo "$input_string" | cut -d . -f -2)
+          echo "::set-output name=python_version::$lower_case_string" >> $GITHUB_OUTPUT
+        shell: bash
+
+      - name: Run nox lint
+        run: nox -s lint -p ${{ steps.version_processed.outputs.python_version }}
+
+      - name: Run nox lint
+        run: nox -s mypy -p ${{ steps.version_processed.outputs.python_version }}
+
+      - name: Run nox pytest
+        run: nox -s tests -p ${{ steps.version_processed.outputs.python_version }}

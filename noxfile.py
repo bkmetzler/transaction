@@ -1,8 +1,22 @@
 import nox
 from nox.sessions import Session
 
+PYTHON_39 = "3.9"
+PYTHON_310 = "3.10"
+PYTHON_311 = "3.11"
+PYTHON_312 = "3.12"
+PYTHON_313 = "3.13"
+PYTHON_314 = "3.14"
 
-@nox.session(python=["3.12"])
+
+PYTHON_VERSIONS = {
+    "all": [PYTHON_311, PYTHON_312, PYTHON_313, PYTHON_314],
+    "standard": [PYTHON_311, PYTHON_312, PYTHON_313],
+    "latest": [PYTHON_312],
+}
+
+
+@nox.session(python=PYTHON_VERSIONS["standard"])
 def tests(session: Session) -> None:
     """
     Initialize environment and run pytest
@@ -17,7 +31,7 @@ def tests(session: Session) -> None:
     session.run("pytest")
 
 
-@nox.session
+@nox.session(python=PYTHON_VERSIONS["standard"])
 def lint(session: Session) -> None:
     """
     Initialize environment by installing black, mypy, and ruff.
@@ -36,7 +50,7 @@ def lint(session: Session) -> None:
     session.run("ruff", "check", ".")
 
 
-@nox.session
+@nox.session(python=PYTHON_VERSIONS["standard"])
 def mypy(session: Session) -> None:
     """
     Initialize environment and run mypy
@@ -51,7 +65,7 @@ def mypy(session: Session) -> None:
     session.run("mypy", "-p", "transaction")
 
 
-@nox.session
+@nox.session(python=PYTHON_VERSIONS["latest"])
 def black(session: Session) -> None:
     """
     Initialize environment and run black to reformat code
@@ -67,7 +81,7 @@ def black(session: Session) -> None:
     session.run("black", ".")
 
 
-@nox.session
+@nox.session(python=PYTHON_VERSIONS["latest"])
 def ruff(session: Session) -> None:
     """
     Initialize environment, install and run ruff to reformat code
@@ -82,7 +96,7 @@ def ruff(session: Session) -> None:
     session.run("ruff", "format", ".")
 
 
-@nox.session
+@nox.session(default=False)
 def format(session: Session) -> None:
     """
     Initialize environment and run ruff and black sessions

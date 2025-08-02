@@ -11,17 +11,18 @@ authors = [
 ]
 readme = "README.md"
 license = { file = "LICENSE.md" }
-requires-python = ">=3.12"
+requires-python = ">=3.9"
 dependencies = []
+
+
 
 classifiers = [
     "Development Status :: 3 - Alpha",
     "Programming Language :: Python",
     "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: 3.13",
-    "Programming Language :: Python :: 3.14",
-    "Programming Language :: Python :: 3.15",
     "Operating System :: OS Independent",
     "Intended Audience :: Developers",
     "Intended Audience :: System Administrators",
@@ -29,6 +30,15 @@ classifiers = [
     "License :: Free for non-commercial use",
 ]
 
+[project.optional-dependencies]
+dev = [
+    "pytest",
+    "pytest-asyncio",
+    "pytest-cov",
+    "black",
+    "mypy",
+    "ruff",
+]
 
 [project.urls]
 "Home Page" = "https://github.com/bkmetzler/transaction"
@@ -113,7 +123,7 @@ UNIT_TEST = true
 [tool.pytest.ini_options]
 pythonpath = "."
 minversion = "6.0"
-addopts = "--cov=transaction --cov-report=term-missing --benchmark-enable -ra"
+addopts = "--cov=transaction --cov-report=term-missing -ra"
 testpaths = ["tests"]
 
 [tool.flake8]

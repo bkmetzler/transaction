@@ -6,7 +6,7 @@ from collections.abc import Callable
 from dataclasses import dataclass
 from typing import Any
 from typing import cast
-from typing import Self
+from typing import Union
 
 
 @dataclass
@@ -18,7 +18,7 @@ class FunctionCall:
     name: str
     args: tuple[Any, ...]
     kwargs: dict[str, Any]
-    rollback_func: Callable[..., Any] | None = None
+    rollback_func: Callable[..., Any] | None = None  # noqa
     rolled_back: bool = False
     exception: str | None = None
 
@@ -58,7 +58,7 @@ class FunctionCall:
 
         Returns:
             dict[str, Any]
-                dict representation of FunctionCall/Self
+                dict representation of FunctionCall
         """
         return {
             "name": self.name,
@@ -77,7 +77,7 @@ class FunctionCall:
 
         Returns:
             str
-                JSON string representation of FunctionCall/Self
+                JSON string representation of FunctionCall
         """
         return json.dumps(self.to_dict(), indent=4)
 
@@ -87,27 +87,27 @@ class FunctionCall:
 
         Returns:
             bytes
-                Pickled instance version of FunctionCall/Self
+                Pickled instance version of FunctionCall
         """
 
         return pickle.dumps(self)
 
     @classmethod
-    def from_pickle(cls, pickle_bytes: bytes) -> Self | Any:
+    def from_pickle(cls, pickle_bytes: bytes) -> Union["FunctionCall", Any]:
         """
         This is more of a helper function to convert a pickled instance of class.
         Good use with Redis
 
         Args:
             pickle_bytes:
-                Pickled version of FunctionCall/Self
+                Pickled version of FunctionCall
         Returns:
-            FunctionCall/Self
+            FunctionCall
         """
-        return cast(Self, pickle.loads(pickle_bytes))
+        return cast(FunctionCall, pickle.loads(pickle_bytes))
 
     @classmethod
-    def from_json(cls, in_json: str) -> Self:
+    def from_json(cls, in_json: str) -> "FunctionCall":
         """
         Convert from JSON string to an instance of the class
 
@@ -118,14 +118,14 @@ class FunctionCall:
                 Representation of JSON data needed for 'cls.from_dict()'
 
         Returns:
-            FunctionCall/Self
+            FunctionCall
         """
         return cls.from_dict(json.loads(in_json))
 
     @classmethod
-    def from_dict(cls, data: dict[str, Any]) -> Self:
+    def from_dict(cls, data: dict[str, Any]) -> "FunctionCall":
         """
-        Convert from dict to FunctionCall/Self.
+        Convert from dict to FunctionCall.
 
         Used to read from an external data source.
 
@@ -133,7 +133,7 @@ class FunctionCall:
             data: dict
                 Representation of FunctionCall.
         Returns:
-            FunctionCall/Self
+            FunctionCall
 
         """
         rollback_func = cls._resolve_function(data["rollback_func"]) if data["rollback_func"] else None

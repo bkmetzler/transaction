@@ -2,9 +2,8 @@ import asyncio
 import json
 from contextvars import ContextVar
 from contextvars import Token
-from typing import cast
 from typing import ClassVar
-from typing import Self
+from typing import Optional
 
 from transaction.classes.function_call import FunctionCall
 
@@ -53,11 +52,11 @@ class TransactionState:
             self._current_state.reset(self._token)
             self._token = None
 
-    def __enter__(self) -> Self:
+    def __enter__(self) -> "TransactionState":
         """
         Context Manager start
         Returns:
-            TransactionState/Self
+            TransactionState
 
         """
         self.__begin()
@@ -85,12 +84,12 @@ class TransactionState:
         self.__end()
         return not self._reraise if exc_type else False
 
-    async def __aenter__(self) -> Self:
+    async def __aenter__(self) -> "TransactionState":
         """
         Async Context Manager start
 
         Returns:
-            TransactionState/Self
+            TransactionState
         """
         self.__begin()
         return self
@@ -155,16 +154,16 @@ class TransactionState:
         return json.dumps(data, indent=4)
 
     @classmethod
-    def import_history(cls, json_str: str) -> Self:
+    def import_history(cls, json_str: str) -> "TransactionState":
         """
-        Convert json_str back to a functioning TransactionState/Self
+        Convert json_str back to a functioning TransactionState
 
         Args:
             json_str: str
                 JSON String (created by cls.export_history)
 
         Returns:
-            TransactionState/Self
+            TransactionState
         """
         transaction_state = cls()
         transaction_state.stack.clear()
@@ -172,14 +171,14 @@ class TransactionState:
         return transaction_state
 
     @classmethod
-    def get_current(cls) -> Self | None:
+    def get_current(cls) -> Optional["TransactionState"]:
         """
         Get current Context State as TransactionState
         Returns:
-            TransactionState | Self | None
+            TransactionState | None
 
         """
         state = cls._current_state.get()
         if state is None:
             return None
-        return cast(Self, state)
+        return state
