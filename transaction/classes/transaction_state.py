@@ -2,6 +2,7 @@ import asyncio
 import json
 from contextvars import ContextVar
 from contextvars import Token
+from typing import cast
 from typing import ClassVar
 from typing import Self
 
@@ -171,5 +172,14 @@ class TransactionState:
         return transaction_state
 
     @classmethod
-    def get_current(cls) -> "TransactionState | None":
-        return cls._current_state.get()
+    def get_current(cls) -> Self | None:
+        """
+        Get current Context State as TransactionState
+        Returns:
+            TransactionState | Self | None
+
+        """
+        state = cls._current_state.get()
+        if state is None:
+            return None
+        return cast(Self, state)
