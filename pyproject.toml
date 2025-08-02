@@ -12,36 +12,13 @@ authors = [
 readme = "README.md"
 license = { file = "LICENSE.md" }
 requires-python = ">=3.12"
-dependencies = []
+dependencies = [
+]
 homepage = "https://github.com/bkmetzler/transactional"
-
-[project.urls]
-"Home Page" = "https://github.com/bkmetzler/transaction"
-"Source Code" = "https://github.com/bkmetzler/transaction"
-"Issue Tracker" = "https://github.com/bkmetzler/transaction/issues"
-"Documentation" = "https://github.com/bkmetzler/transaction/wiki"
-
 
 [tool.hatch.version]
 source = "vcs"
 path = "transactional/version.py"
-
-[tool.hatch.build]
-skip-excluded-dirs = true
-include = [
-  "transaction/**",
-  "pyproject.toml",
-  "*.md",
-  "noxfile.py",
-  ".pre-commit-config.yaml",
-  "tests/**",
-  "dev-requirements.txt"
-]
-exclude = [
-  "*.pyc",
-  "__pycache__/",
-  "dist",
-]
 
 [tool.hatch.envs.dev]
 dependencies = [
