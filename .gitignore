@@ -1,0 +1,26 @@
+venv
+.idea/
+__pycache__/
+*.egg-info/
+.cache/
+.history/
+dist/
+build/
+
+*.py[cdixo]
+test.py
+env
+
+# Jupyter Notebook files
+.ipynb_checkpoints/
+.jupyter/
+*.ipynb
+
+archive-*.tgz
+
+*.sqlite3
+*.db
+.env
+.venv
+
+.coverage

@@ -1,0 +1,89 @@
+[build-system]
+requires = ["hatchling", "hatch-vcs"]
+build-backend = "hatchling.build"
+
+[project]
+name = "transaction"
+dynamic = ["version"]
+description = "A lightweight transactional execution tracker with rollback support."
+authors = [
+  { name = "Brian Metzler", email = "baldie@gmail.com" }
+]
+readme = "README.md"
+license = { file = "LICENSE.md" }
+requires-python = ">=3.12"
+dependencies = [
+]
+homepage = "https://github.com/bkmetzler/transactional"
+
+[tool.hatch.version]
+source = "vcs"
+path = "transactional/version.py"
+
+[tool.hatch.envs.dev]
+dependencies = [
+  "pytest",
+  "black",
+  "mypy",
+  "ruff",
+  "coverage",
+  "pre-commit"
+]
+
+[tool.hatch.envs.test]
+dependencies = [
+  "pytest"
+]
+
+[tool.hatch.envs.test.scripts]
+test = "PYTHONPATH=. pytest"
+
+[tool.hatch.envs.lint]
+dependencies = [
+  "nox"
+]
+[tool.hatch.envs.lint.scripts]
+check = [
+  "nox -s lint",
+]
+format = [
+  "nox -c format",
+]
+
+[tool.black]
+line-length = 120
+target-version = ['py312']
+
+[tool.mypy]
+strict = true
+exclude = "^(build|dist|tests)/"
+python_version = "3.12"
+
+show_error_code_links = true
+show_error_context = true
+exclude_gitignore = true
+strict_optional = true
+warn_redundant_casts = true
+warn_unused_ignores = true
+check_untyped_defs = true
+ignore_missing_imports = true
+disallow_untyped_defs = true
+
+[tool.pytest_env]
+UNIT_TEST = true
+
+[tool.pytest.ini_options]
+pythonpath = "."
+minversion = "6.0"
+addopts = "--cov=transaction --cov-report=term-missing --benchmark-enable -ra"
+testpaths = ["tests"]
+
+[tool.flake8]
+max-line-length = 120
+per-file-ignores = """
+    tests/*/fixtures/*.py: E501
+"""
+
+[tool.ruff]
+line-length = 120
+target-version = "py312"

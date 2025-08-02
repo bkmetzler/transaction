@@ -1,0 +1,76 @@
+default_language_version:
+    python: python3.12
+
+repos:
+- repo: https://github.com/pre-commit/pre-commit-hooks
+  rev: v5.0.0
+  hooks:
+  - id: check-toml
+  - id: check-yaml
+  - id: check-json
+  - id: trailing-whitespace
+  - id: end-of-file-fixer
+
+- repo: https://github.com/psf/black-pre-commit-mirror
+  rev: 25.1.0
+  hooks:
+  - id: black
+
+- repo: https://github.com/charliermarsh/ruff-pre-commit
+  rev: v0.4.4
+  hooks:
+    - id: ruff
+
+- repo: https://github.com/PyCQA/flake8
+  rev: 7.2.0
+  hooks:
+  - id: flake8
+    additional_dependencies:
+      - pep8-naming
+      - flake8-implicit-str-concat
+      - flake8-pyproject
+
+- repo: https://github.com/asottile/reorder_python_imports
+  rev: v3.15.0
+  hooks:
+  - id: reorder-python-imports
+    args:
+      - --py312-plus
+
+- repo: https://github.com/pre-commit/mirrors-mypy
+  rev: v1.16.0
+  hooks:
+    - id: mypy
+      language: system
+      pass_filenames: false
+      args: [ '.' ]
+
+- repo: https://github.com/asottile/pyupgrade
+  rev: v3.20.0
+  hooks:
+  - id: pyupgrade
+    args: [--py312-plus]
+
+- repo: https://github.com/jazzband/pip-tools
+  rev: 7.4.1
+  hooks:
+  - id: pip-compile
+    name: pip-compile requirements.in
+    files: ^(setup\.cfg|requirements\.in|requirements\.txt)$
+    args:
+    - "--emit-index-url"
+    #- "--extra-index-url"
+    #- "https://artifacts.rackspace.net/artifactory/api/pypi/pypi/simple"
+    - "--output-file"
+    - "requirements.txt"
+    - "requirements.in"
+#  - id: pip-compile
+#    name: pip-compile test-requirements.in
+#    files: ^(setup\.cfg|test-requirements\.txt|test-requirements\.in)$
+#    args:
+#    - "--emit-index-url"
+#    - "--extra-index-url"
+#    - "https://artifacts.rackspace.net/artifactory/api/pypi/pypi/simple"
+#    - "--output-file"
+#    - "test-requirements.txt"
+#    - "test-requirements.in"
