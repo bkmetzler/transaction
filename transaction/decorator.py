@@ -16,7 +16,7 @@ T = TypeVar("T")
 P = ParamSpec("P")
 
 
-def transaction(func: Callable[P, T]) -> Callable[P, T | Awaitable[T]]:
+def transaction(func: Callable[P, T] | staticmethod | classmethod) -> Callable[P, T | Awaitable[T]]:  # type: ignore[misc]
     """
     Decorator used to define initial functions
     Args:
@@ -25,6 +25,12 @@ def transaction(func: Callable[P, T]) -> Callable[P, T | Awaitable[T]]:
     Returns:
 
     """
+    if isinstance(func, (staticmethod, classmethod)):
+        wrapped_func = TransactionWrapper(func.__func__)
+        descriptor = type(func)(wrapped_func)
+        setattr(descriptor, "rollback", wrapped_func.rollback)
+        return cast(Callable[P, T | Awaitable[T]], descriptor)
+
     registrar = TransactionWrapper(func)
     return cast(Callable[P, T | Awaitable[T]], registrar)
 
