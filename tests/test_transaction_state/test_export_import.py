@@ -7,14 +7,14 @@ from transaction.decorator import transaction
 
 # Dummy function
 @transaction
-def dummy_func(x: int) -> None:
-    pass
+def dummy_func(x: int) -> int:
+    return x
 
 
 # Dummy rollback function
 @dummy_func.rollback
-def rollback_func(x: int) -> None:
-    pass
+def rollback_func(x: int) -> bool:
+    return True
 
 
 def test_export_import_roundtrip():
@@ -43,6 +43,30 @@ def test_export_import_history():
                 name="dummy_func", args=(2,), kwargs={}, rollback_func=rollback_func, rolled_back=False, exception=None
             )
         )
+        json_data = state.export_history()
+        j_data = json.loads(json_data)
+        assert j_data == [
+            {
+                "name": "dummy_func",
+                "args": [1],
+                "kwargs": {},
+                "rollback_func": "test_export_import.rollback_func",
+                "rolled_back": False,
+                "exception": None,
+            },
+            {
+                "name": "dummy_func",
+                "args": [2],
+                "kwargs": {},
+                "rollback_func": "test_export_import.rollback_func",
+                "rolled_back": False,
+                "exception": None,
+            },
+        ]
+        assert isinstance(json_data, str)
+        assert '"name": "dummy_func"' in json_data
+        assert '"rollback_func": "test_export_import.rollback_func"' in json_data
+
         state.rollback()
         json_data = state.export_history()
     assert isinstance(json_data, str)

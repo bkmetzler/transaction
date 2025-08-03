@@ -125,6 +125,7 @@ pythonpath = "."
 minversion = "6.0"
 addopts = "--cov=transaction --cov-report=term-missing -ra"
 testpaths = ["tests"]
+asyncio_mode = "auto"
 
 [tool.flake8]
 max-line-length = 120

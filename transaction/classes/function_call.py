@@ -8,6 +8,10 @@ from typing import Any
 from typing import cast
 from typing import Union
 
+from transaction.helpers import FunctionType
+from transaction.helpers import get_class
+from transaction.helpers import inspect_function
+
 
 @dataclass
 class FunctionCall:
@@ -44,7 +48,13 @@ class FunctionCall:
             raise RuntimeError(self.exception)
 
         try:
-            result = self.rollback_func(*self.args, **self.kwargs)
+            func_type = inspect_function(self.rollback_func)
+            if func_type == FunctionType.CLASS_METHOD:
+                class_type = get_class(self.rollback_func)
+                result = self.rollback_func(class_type, *self.args, **self.kwargs)
+            else:
+                result = self.rollback_func(*self.args, **self.kwargs)
+
             if inspect.iscoroutine(result) or inspect.isawaitable(result):
                 await result
             self.rolled_back = True
