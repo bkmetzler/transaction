@@ -240,3 +240,26 @@ Simple async context lock.
 
 Export and import of transaction state.  Note the two sections indicate when it was exported and when it was imported.
 At the end of this section, it would have logged 6 calls to "step1" with the different input variables.
+
+### Example 7
+
+```python
+from transaction import transaction
+
+
+class MyClass:
+    @transaction
+    @staticmethod
+    def static_method(i: int) -> int:
+        return i
+
+    @transaction
+    @classmethod
+    def class_method(cls, j: str) -> str:
+        return j
+```
+
+When stacking decorators, `@transaction` must wrap `@staticmethod` or `@classmethod` so the transaction wrapper sees the
+final callable. Decorators are applied inside-out, so putting the descriptor decorators on top would hand `@transaction`
+the descriptor object instead of the function. This library includes enhanced descriptor handling that lets the reversed
+order work, but keeping `@transaction` outermost avoids relying on that behavior.
