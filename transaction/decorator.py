@@ -75,7 +75,6 @@ class TransactionWrapper:
         self.func = func
         self.rollback_func: Callable[..., Any] | None = None
         self._is_coroutine = inspect.iscoroutinefunction(func)
-        # wraps(func)(self)  # type: ignore[arg-type]
         functools.update_wrapper(self, func)  # type: ignore[arg-type]
 
     def rollback(self, func: Callable[..., Any]) -> Callable[..., Any]:
@@ -117,6 +116,7 @@ class TransactionWrapper:
 
         # As we do not have access to the developers' code, we do not know paramspec or kwargspec.
         func_type = inspect_function(self.func)
+
         if func_type == FunctionType.CLASS_METHOD:
             class_type = get_class(self.func)
             result = self.func(class_type, *args, **kwargs)  # type: ignore[arg-type]
@@ -124,7 +124,6 @@ class TransactionWrapper:
             result = self.func(*args, **kwargs)  # type: ignore[arg-type]
 
         if self._is_coroutine and inspect.isawaitable(result):
-
             async def wrapped() -> T:
                 return await result  # type: ignore[no-any-return]
 

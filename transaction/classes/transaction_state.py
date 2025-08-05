@@ -80,7 +80,7 @@ class TransactionState:
                 False:  Reraise exception
         """
         if exc_type:
-            asyncio.run(self.rollback())
+            self.rollback()
         self.__end()
         return not self._reraise if exc_type else False
 
