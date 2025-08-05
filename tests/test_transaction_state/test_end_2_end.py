@@ -1,5 +1,4 @@
 import json
-from contextlib import nullcontext
 
 import pytest
 
@@ -9,8 +8,6 @@ from transaction import TransactionState
 
 executed: list[tuple[str, int]] = []
 rolled_back: list[tuple[str, int]] = []
-
-
 
 
 def func1_except(i: int) -> int:

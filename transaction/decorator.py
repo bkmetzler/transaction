@@ -124,6 +124,7 @@ class TransactionWrapper:
             result = self.func(*args, **kwargs)  # type: ignore[arg-type]
 
         if self._is_coroutine and inspect.isawaitable(result):
+
             async def wrapped() -> T:
                 return await result  # type: ignore[no-any-return]
 
