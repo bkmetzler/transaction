@@ -17,4 +17,11 @@ async def test_sync_rollback_with_running_loop():
     state.rollback()
 
     assert ran == [True]
-    assert state.stack == []
+    assert state.stack[0].to_dict() == {
+        "args": (),
+        "exception": None,
+        "kwargs": {},
+        "name": "dummy",
+        "rollback_func": "test_sync_rollback.rollback_func",
+        "rolled_back": True,
+    }

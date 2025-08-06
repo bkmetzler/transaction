@@ -145,6 +145,7 @@ class TransactionState:
         for call in reversed(self.stack):
             await call.rollback()
 
+    def clear(self) -> None:
         self.stack.clear()
 
     def rollback(self) -> None:

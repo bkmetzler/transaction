@@ -61,6 +61,7 @@ class FunctionCall:
         except Exception as e:
             self.exception = f"{type(e).__name__}: {e}"
             raise
+        self.rolled_back = True
 
     def to_dict(self) -> dict[str, Any]:
         """
