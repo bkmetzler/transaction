@@ -76,7 +76,7 @@ async def test_transaction_rollback_metadata():
         except Exception:
             pass
         finally:
-            await state.rollback()
+            await state.rollback_async()
 
         assert executed == [3, 2]
         assert rolled_back == [2, 3]
