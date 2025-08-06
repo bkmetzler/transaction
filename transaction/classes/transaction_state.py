@@ -80,7 +80,6 @@ class TransactionState:
                 True: Suppress exceptions
                 False:  Reraise exception
         """
-        print("__exit__", exc_type, exc_val, exc_tb)
         if exc_type:
             self.rollback()
         self.__end()
@@ -144,8 +143,6 @@ class TransactionState:
 
         for call in reversed(self.stack):
             await call.rollback()
-
-        self.stack.clear()
 
     def rollback(self) -> None:
         """

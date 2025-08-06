@@ -57,7 +57,7 @@ def transaction(func: Callable[P, T]) -> Callable[P, T | Awaitable[T]]:
             if isinstance(func, classmethod):
                 raise TypeError("@transaction must be applied before @classmethod")
             return ClassTransactionMethod(func)  # type: ignore[return-value]
-        if not func_type.is_not_supported():
+        if not func_type.is_supported():
             raise ValueError(f"UNSUPPORTED TYPE: {func_type}")
         raise ValueError(f"UNKNOWN TYPE: {func_type}")
 

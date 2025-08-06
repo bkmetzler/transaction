@@ -69,6 +69,7 @@ def test_export_import_history():
 
         state.rollback()
         json_data = state.export_history()
+        state.stack.clear()
         cleared_json = state.export_history()
     assert cleared_json == "[]"
     assert isinstance(json_data, str)
@@ -79,5 +80,5 @@ def test_export_import_history():
         assert len(txn.stack) == 2
         for call in txn.stack:
             assert call.name == "dummy_func"
-            assert call.rolled_back is False
+            assert call.rolled_back is True
             assert call.to_dict()["rollback_func"] == "test_export_import.rollback_func"

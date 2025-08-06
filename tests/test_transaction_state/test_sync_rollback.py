@@ -17,4 +17,4 @@ async def test_sync_rollback_with_running_loop():
     state.rollback()
 
     assert ran == [True]
-    assert state.stack == []
+    assert [call.rolled_back for call in state.stack] == [True]
