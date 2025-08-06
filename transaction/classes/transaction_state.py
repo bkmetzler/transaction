@@ -80,7 +80,6 @@ class TransactionState:
                 True: Suppress exceptions
                 False:  Reraise exception
         """
-        print("__exit__", exc_type, exc_val, exc_tb)
         if exc_type:
             self.rollback()
         self.__end()
@@ -213,8 +212,7 @@ class TransactionState:
             TransactionState
         """
         transaction_state = cls()
-        transaction_state.stack.clear()
-        transaction_state.stack.extend([FunctionCall.from_dict(item) for item in json.loads(json_str)])
+        transaction_state.stack = [FunctionCall.from_dict(item) for item in json.loads(json_str)]
         return transaction_state
 
     @classmethod
@@ -225,7 +223,4 @@ class TransactionState:
             TransactionState | None
 
         """
-        state = cls._current_state.get()
-        if state is None:
-            return None
-        return state
+        return cls._current_state.get()

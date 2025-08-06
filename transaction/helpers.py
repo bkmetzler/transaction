@@ -21,24 +21,20 @@ class FunctionType(Enum):
     UNKNOWN = auto()
 
     def is_callable(self) -> bool:
-        if self in (
+        return self in {
             FunctionType.ASYNC_FUNCTION,
             FunctionType.COROUTINE_FUNCTION,
             FunctionType.INSTANCE_METHOD,
             FunctionType.REGULAR_FUNCTION,
-        ):
-            return True
-        return False
+        }
 
     def is_not_supported(self) -> bool:
-        if self in (
+        return self not in {
             FunctionType.LAMBDA_FUNCTION,
             FunctionType.PARTIAL_FUNCTION,
             FunctionType.GENERATOR_FUNCTION,
             FunctionType.BUILTIN_FUNCTION,
-        ):
-            return False
-        return True
+        }
 
 
 def get_function_type(ctx: Any, func: Callable) -> FunctionType:  # type: ignore[type-arg]
@@ -91,6 +87,4 @@ def inspect_function(func: Callable) -> FunctionType:  # type: ignore[type-arg]
 
 
 def get_class(func: Callable) -> Any:  # type:ignore[type-arg]
-    if hasattr(func, "__class__"):
-        return func.__class__
-    return func
+    return getattr(func, "__class__", func)

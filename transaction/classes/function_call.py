@@ -55,13 +55,12 @@ class FunctionCall:
             else:
                 result = self.rollback_func(*self.args, **self.kwargs)
 
-            if inspect.iscoroutine(result) or inspect.isawaitable(result):
+            if inspect.isawaitable(result):
                 await result
             self.rolled_back = True
         except Exception as e:
             self.exception = f"{type(e).__name__}: {e}"
             raise
-        self.rolled_back = True
 
     def to_dict(self) -> dict[str, Any]:
         """
