@@ -22,5 +22,6 @@ tar \
   --exclude=".nox/*" \
   --exclude=".ruff_cache/*" \
   --exclude=".benchmarks/*" \
+  --exclude=".coverage" \
   -zcvf \
   archive-${TIMESTAMP}.tgz .

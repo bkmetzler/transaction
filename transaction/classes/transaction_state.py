@@ -1,5 +1,6 @@
 import asyncio
 import json
+import threading
 from contextvars import ContextVar
 from contextvars import Token
 from typing import ClassVar
@@ -80,7 +81,7 @@ class TransactionState:
                 False:  Reraise exception
         """
         if exc_type:
-            asyncio.run(self.rollback())
+            self.rollback()
         self.__end()
         return not self._reraise if exc_type else False
 
@@ -115,7 +116,7 @@ class TransactionState:
 
         """
         if exc_type:
-            await self.rollback()
+            await self.rollback_async()
         self.__end()
         return not self._reraise if exc_type else False
 
@@ -132,16 +133,61 @@ class TransactionState:
         """
         self.stack.append(call)
 
-    async def rollback(self) -> None:
+    async def rollback_async(self) -> None:
         """
         Run all the 'rollback_func' functions and mark them as 'cls.rolled_back' to True.
 
         Returns:
             None
         """
+
         for call in reversed(self.stack):
             await call.rollback()
+
+    def clear(self) -> None:
         self.stack.clear()
+
+    def rollback(self) -> None:
+        """
+        Synchronously execute all rollback functions.
+
+        This helper manages the event loop. If an event loop is already
+        running, the rollback coroutine is executed in a separate thread to
+        avoid re-entrancy issues. If no loop is running, a new loop is
+        created for the duration of the rollback.
+
+        Returns:
+            None
+        """
+
+        async def _run() -> None:
+            await self.rollback_async()
+
+        try:
+            loop = asyncio.get_running_loop()
+        except RuntimeError:
+            loop = asyncio.new_event_loop()
+
+        if loop and loop.is_running():
+            exc: list[BaseException] = []
+
+            def runner() -> None:
+                try:
+                    asyncio.run(_run())
+                except BaseException as e:  # noqa: BLE001
+                    exc.append(e)
+
+            thread = threading.Thread(target=runner)
+            thread.start()
+            thread.join()
+            if exc:
+                raise exc[0]
+        else:
+            try:
+                loop.run_until_complete(loop.create_task(_run()))
+            finally:
+                if loop is not None:
+                    loop.close()
 
     def export_history(self) -> str:
         """
@@ -178,7 +224,4 @@ class TransactionState:
             TransactionState | None
 
         """
-        state = cls._current_state.get()
-        if state is None:
-            return None
-        return state
+        return cls._current_state.get()

@@ -1,7 +1,7 @@
+import functools
 import inspect
 from collections.abc import Awaitable
 from collections.abc import Callable
-from functools import wraps
 from typing import Any
 from typing import cast
 from typing import ParamSpec
@@ -10,23 +10,60 @@ from typing import TypeVar
 
 from transaction.classes.function_call import FunctionCall
 from transaction.classes.transaction_state import TransactionState
+from transaction.helpers import FunctionType
+from transaction.helpers import get_class
+from transaction.helpers import inspect_function
 
 
 T = TypeVar("T")
 P = ParamSpec("P")
 
 
+class StaticTransactionMethod(staticmethod):  # type: ignore[type-arg]
+    def __init__(self, wrapped: Callable):  # type: ignore[type-arg]
+        self._wrapper = TransactionWrapper(wrapped)
+        super().__init__(self._wrapper)
+
+    def rollback(self, rollback_func: Callable) -> Callable:  # type: ignore[type-arg]
+        return self._wrapper.rollback(rollback_func)
+
+
+class ClassTransactionMethod(classmethod):  # type: ignore[type-arg]
+    def __init__(self, wrapped: Callable):  # type: ignore[type-arg]
+        self._wrapper = TransactionWrapper(wrapped)
+        super().__init__(self._wrapper)  # type: ignore[arg-type]
+
+    def rollback(self, rollback_func: Callable) -> Callable:  # type: ignore[type-arg]
+        return self._wrapper.rollback(rollback_func)
+
+
 def transaction(func: Callable[P, T]) -> Callable[P, T | Awaitable[T]]:
     """
     Decorator used to define initial functions
     Args:
-        func:
+        func: callable/awaitable function
 
-    Returns:
-
+    Returns: callable/awaitable function
     """
-    registrar = TransactionWrapper(func)
-    return cast(Callable[P, T | Awaitable[T]], registrar)
+
+    func_type = inspect_function(func)
+
+    if not func_type.is_callable():
+        if func_type == FunctionType.STATIC_METHOD:
+            if isinstance(func, staticmethod):
+                raise TypeError("@transaction must be applied before @staticmethod")
+            return StaticTransactionMethod(func)
+        elif func_type == FunctionType.CLASS_METHOD:
+            if isinstance(func, classmethod):
+                raise TypeError("@transaction must be applied before @classmethod")
+            return ClassTransactionMethod(func)  # type: ignore[return-value]
+        if not func_type.is_not_supported():
+            raise ValueError(f"UNSUPPORTED TYPE: {func_type}")
+        raise ValueError(f"UNKNOWN TYPE: {func_type}")
+
+    # If standard function, then it falls down to here.
+    wrapper = TransactionWrapper(func)
+    return cast(Callable[P, T | Awaitable[T]], wrapper)
 
 
 class TransactionWrapper:
@@ -38,7 +75,7 @@ class TransactionWrapper:
         self.func = func
         self.rollback_func: Callable[..., Any] | None = None
         self._is_coroutine = inspect.iscoroutinefunction(func)
-        wraps(func)(self)  # type: ignore[arg-type]
+        functools.update_wrapper(self, func)  # type: ignore[arg-type]
 
     def rollback(self, func: Callable[..., Any]) -> Callable[..., Any]:
         """
@@ -78,7 +115,14 @@ class TransactionWrapper:
             state.record_call(call)
 
         # As we do not have access to the developers' code, we do not know paramspec or kwargspec.
-        result = self.func(*args, **kwargs)  # type: ignore[arg-type]
+        func_type = inspect_function(self.func)
+
+        if func_type == FunctionType.CLASS_METHOD:
+            class_type = get_class(self.func)
+            result = self.func(class_type, *args, **kwargs)  # type: ignore[arg-type]
+        else:
+            result = self.func(*args, **kwargs)  # type: ignore[arg-type]
+
         if self._is_coroutine and inspect.isawaitable(result):
 
             async def wrapped() -> T:
